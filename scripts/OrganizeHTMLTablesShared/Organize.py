@@ -15,6 +15,14 @@ import os
 from bs4 import BeautifulSoup
 from collections import defaultdict
 
+def median(lst):
+    lst = sorted(lst)
+    if len(lst) < 1:
+            return None
+    if len(lst) %2 == 1:
+            return lst[((len(lst)+1)/2)-1]
+    else:
+            return float(sum(lst[(len(lst)/2)-1:(len(lst)/2)+1]))/2.0
 
 def is_empty(any_structure):
     if any_structure:
@@ -32,7 +40,7 @@ def generate():
     dir = os.path.dirname(__file__)
 
     # [WORKING] Section fixes broken HTML before processing
-    fileName = os.path.join(dir, "tables.html")
+    fileName = os.path.join(dir, "output/ddi_tables.html")
     file = open(fileName, "rb")
     html = file.read().decode("utf-8")
 
@@ -40,7 +48,7 @@ def generate():
     ## encoding and "prettify" are done at the time of extraction.
     soupTemp = BeautifulSoup(html)
 
-    output = open(os.path.join(dir, "output/output.txt"), "w")
+    output = open(os.path.join(dir, "output/test_output.txt"), "w")
     output.write(soupTemp.prettify().encode("utf-8"))
     output.close()
 
@@ -68,15 +76,18 @@ def organize():
     rowsTot = 0
     dir = os.path.dirname(__file__)  # Absolute path of the directory where the program resides
 
-    input = open(os.path.join(dir, "output/output.txt"), "r")  # Opens output.txt
+    input = open(os.path.join(dir, "output/test_output.txt"), "r")  # Opens output.txt
     htmlParse = input.read().decode("utf-8")  # Sets htmlParse to reading the input with utf-8 decoding
 
     # Section prepares each part for addition to tableInfo dictionary
     soup = BeautifulSoup(htmlParse, "html.parser")
+    #print soup
     tables = soup.findChildren("table")  # (ResultSet) - finds all the <table> tags in the HTML of output.txt
+    #print tables
 
     # Creates a list of table names (List) -- using input tag to define table name which is stored in value attribute
     tableIDs = [(n["value"]) for n in soup.findChildren("input")]
+    #print tableIDs
 
     #############################################################################
     #  - Loops through each table and finds every row in each table.            #
@@ -169,12 +180,14 @@ def organize():
     print("Total Number of Columns: " + str(colsTot))
     print("Minimum Number of Columns: " + str(min(tableStatsCols)))
     print("Maximum Number of Columns: " + str(max(tableStatsCols)))
-    print("Average Number of Columns: " + str(sum(tableStatsCols)/len(tableStatsCols)) + "\n\n")
+    print "Median Number of Columns: " + str(median(tableStatsCols))
+    print("Average Number of Columns: " + str(float(colsTot)/float(len(tableStatsCols))) + "\n\n")
 
     print("Total Number of Rows: " + str(rowsTot))
     print("Minimum Number of Rows: " + str(min(tableStatsRows)))
     print("Maximum Number of Rows: " + str(max(tableStatsRows)))
-    print("Average Number of Rows: " + str(sum(tableStatsRows)/len(tableStatsRows)) + "\n\n")
+    print "Median Number of Rows: " + str(median(tableStatsRows))
+    print("Average Number of Rows: " + str(float(rowsTot)/float(len(tableStatsRows))) + "\n\n")
 
 
 # Takes a text database and categorizes everything into a directory

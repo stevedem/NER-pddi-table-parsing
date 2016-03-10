@@ -137,6 +137,7 @@ def createList(structure):
 def classify():
     headerClassification = {}
     tableStructure = []
+    unique_headers = []
 
     dir = os.path.dirname(__file__)
 
@@ -162,7 +163,7 @@ def classify():
 
     # Absolute path of the directory where the program resides
     dir = os.path.dirname(__file__)
-    input = open(os.path.join(dir, "output/output.txt"), "r")
+    input = open(os.path.join(dir, "output/test_output.txt"), "r")
     htmlParse = input.read().decode("utf-8")
 
     soup = BeautifulSoup(htmlParse, "html.parser")
@@ -170,6 +171,8 @@ def classify():
 
     # Creates a list of table names (List) -- using input tag to define table name which is stored in value attribute
     tableIDs = [(n["value"]) for n in soup.findChildren("input")]
+    print tableIDs
+    print str(len(tableIDs))
 
     # Go through tables and print each tables' categorical structure.
     # Iterates through all of the tableIDs and gathers each table's content
@@ -182,6 +185,10 @@ def classify():
                 soup = BeautifulSoup(str(line.findChildren(["th", "td"])))
                 # Properly formats and encodes table headers
                 tempData = (re.sub(' +', ' ', soup.text.strip("\t\n\r").replace("\n", "").strip())).upper().encode("utf-8")
+                list_headers =  generateList(str(tempData))
+                for l in list_headers:
+                    if l not in unique_headers:
+                        unique_headers.append(l)
 
                 # Gathers table headers for classification and construction of categorical assignment string
                 tableStructure.append(generateStructure(str(tableIDs[c]), generateList(str(tempData)), headerClassification))
@@ -201,17 +208,62 @@ def classify():
     # Print number of unique table structures
     '''print "There are " + str(len(dict.keys())) + " unique table structures. \n"'''
 
+    drugnameorclass = []
+    reccom = []
+    eff = []
+    intsubprop = []
+    misc = []
+    intprop = []
+    sampsize = []
+    intsub = []
+    other = []
+
+
+    print "\nNumber of unique headers: " + str(len(unique_headers))
+
+    for header in unique_headers:
+        if header in headerClassification:
+            if 'Drug Name or Drug Class' in headerClassification[header]:
+                drugnameorclass.append(header)
+            elif 'Recommendation or Comment' in headerClassification[header]:
+                reccom.append(header)
+            elif 'Effect on Drug' in headerClassification[header]:
+                eff.append(header)
+            elif 'Interacting Substance Properties' in headerClassification[header]:
+                intsubprop.append(header)
+            elif 'Misc.' in headerClassification[header]:
+                misc.append(header)
+            elif 'Interaction Properties' in headerClassification[header]:
+                intprop.append(header)
+            elif 'Sample Size' in headerClassification[header]:
+                sampsize.append(header)
+            elif headerClassification[header] == 'Interacting Substance':
+                intsub.append(header)
+            else:
+                other.append(header)
+                
+    print "\nNumber of unique headers per category: "
+    print "Drug Name or Drug Class: " + str(len(drugnameorclass))
+    print "Recommendation or Comment: " + str(len(reccom))
+    print "Effect on Drug: " + str(len(eff))
+    print "Interacting Substance Properties: " + str(len(intsubprop))
+    print "Misc.: " + str(len(misc))
+    print "Interaction Properties: " + str(len(intprop))
+    print "Sample Size: " + str(len(sampsize))
+    print "Interacting Substance: " + str(len(intsub))
+    print "Other: " + str(len(other))
+
     # Prints the number of tables within each unique table structure
     for key in dict:
         if key in dict.keys():
             splits = dict[key].split(' ')
-            print 'Table Header Structure: '
+            '''print 'Table Header Structure: '
             print key
             print str(len(splits)) + ' tables.'
             print '\n'
             # Prints each table name
             # for s in splits:
-                # print s
+                # print s '''
 
     # Prints each table's structure (listForm) including all errors
     '''listForm = createList(tableStructure)
